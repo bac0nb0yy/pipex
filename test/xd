@@ -1,0 +1,7 @@
+total 40
+drwxr-xr-x  2 dtelnov 2022_paris  4096 May 12 21:22 includes
+drwxr-xr-x 14 dtelnov 2022_paris  4096 May 13 05:07 libft
+-rw-r--r--  1 dtelnov 2022_paris  2524 May 13 04:57 Makefile
+-rwxr-xr-x  1 dtelnov 2022_paris 18472 May 13 06:25 pipex
+drwxr-xr-x  2 dtelnov 2022_paris  4096 May 13 06:25 sources
+drwxr-xr-x  2 dtelnov 2022_paris  4096 May  4 03:07 test
