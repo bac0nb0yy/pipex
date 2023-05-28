@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/05/13 06:43:29 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/05/17 21:09:39 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,76 +41,103 @@ char	**parse_path(char **env)
 	return (NULL);
 }
 
-// void    pipex(int f1, int f2, char *cmd1, char *cmd 2)
-// {
-//     int   end[2];
-//     int   status;
-//     pid_t child1;
-//     pid_t child2;    pipe(end);
-//     child1 = fork();
-//     if (child1 < 0)
-//          return (perror("Fork: "));
-//     if (child1 == 0)
-//         child_one(f1, cmd1);
-//     child2 = fork();
-//     if (child2 < 0)
-//          return (perror("Fork: "));
-//     if (child2 == 0)
-//         child_two(f2, cmd2);
-//     close(end[0]);
-//     close(end[1]);
-//     waitpid(child1, &status, 0);
-//     waitpid(child2, &status, 0);
-// }
+char	*join_three_args(const char *path, char *delimiter, char *cmd)
+{
+	char		*ret;
+	const int	path_len = ft_strlen(path);
+	const int	delimiter_len = ft_strlen(delimiter);
+	const int	cmd_len = ft_strlen(cmd);
+
+	if (!path)
+		return (NULL);
+	if (!cmd)
+	{
+		ret = malloc(path_len + delimiter_len + 1);
+		ft_memmove(ret, path, path_len);
+		ft_memmove(ret + path_len, delimiter, delimiter_len + 1);
+		return (ret);
+	}
+	ret = malloc(path_len + delimiter_len + cmd_len + 1);
+	ft_memmove(ret, path, path_len);
+	ft_memmove(ret + path_len, delimiter, delimiter_len);
+	ft_memmove(ret + path_len + delimiter_len, cmd, cmd_len + 1);
+	return (ret);
+}
+
+void	fork_one(int fd1, int fds[], char **av, char **env)
+{
+	const char	**paths = (const char **) parse_path(env);
+	const char	**args = (const char **) ft_split(av[2], ' ');
+	char		*curr;
+	int			i;
+
+	dup2(fd1, 0);
+	dup2(fds[1], 1);
+	close(fds[0]);
+	close(fd1);
+	i = 0;
+	while (paths[i])
+	{
+		curr = join_three_args(paths[i], "/", (char *)args[0]);
+		execve(curr, (char *const *)args, env);
+		free(curr);
+		++i;
+	}
+}
+
+void	fork_two(int fd2, int fds[], char **av, char **env)
+{
+	const char	**paths = (const char **) parse_path(env);
+	const char	**args = (const char **) ft_split(av[3], ' ');
+	char		*curr;
+	int			i;
+
+	dup2(fd2, 1);
+	dup2(fds[0], 0);
+	close(fds[1]);
+	close(fd2);
+	i = 0;
+	while (paths[i])
+	{
+		curr = join_three_args(paths[i], "/", (char *)args[0]);
+		execve(curr, (char *const *)args, env);
+		free(curr);
+		++i;
+	}
+}
+
+void	pipex(int fd1, int fd2, char **av, char **env)
+{
+	int		fds[2];
+	int		status;
+	pid_t	child1;
+	pid_t	child2;
+
+	pipe(fds);
+	child1 = fork();
+	// if (child1 < 0)
+		// TODO
+	if (child1 == 0)
+		fork_one(fd1, fds, av, env);
+	child2 = fork();
+	// if (child2 < 0)
+		// 	TODO
+	if (child2 == 0)
+		fork_two(fd2, fds, av, env);
+	close(fds[0]);
+	close(fds[1]);
+	waitpid(child1, &status, 0);
+	waitpid(child2, &status, 0);
+}
 
 int	main(int ac, char **av, char **env)
 {
-	int			fds[2];
-	int			fd;
-	pid_t		pid1, pid2;
-	const char	*file1 = av[1];
-	const char	*cmd1 = av[2];
-	const char	*cmd2 = av[3];
-	const char	*file2 = av[4];
-	const char	**paths = (const char **) parse_path(env);
+	int			fd1;
+	int			fd2;
 
 	(void) ac;
-	(void) paths;
-	pipe(fds);
-	pid1 = fork();
-	if (pid1 == 0)
-	{
-		close(fds[0]);
-		fd = open(file1, O_RDONLY);
-		dup2(fd, 0);
-		close(fd);
-		dup2(fds[1], 1);
-		close(fds[1]);
-		char *cmd1_args[] = {(char *)cmd1, NULL};
-		execve(cmd1, cmd1_args, env);
-	}
-	else
-	{
-		pid2 = fork();
-		if (pid2 == 0)
-		{
-			close(fds[1]);
-			dup2(fds[0], 0);
-			close(fds[0]);
-			fd = open(file2, O_WRONLY);
-			dup2(fd, 1);
-			close(fd);
-			char *cmd2_args[] = {(char *)cmd2, "-l", NULL};
-			execve(cmd2, cmd2_args, env);
-		}
-		else
-		{
-			close(fds[0]);
-			close(fds[1]);
-			waitpid(pid1, NULL, 0);
-			waitpid(pid2, NULL, 0);
-		}
-	}
+	fd1 = open(av[1], O_RDONLY);
+	fd2 = open(av[4], O_WRONLY);
+	pipex(fd1, fd2, av, env);
 	return (0);
 }
-
