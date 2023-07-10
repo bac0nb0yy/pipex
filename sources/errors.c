@@ -17,7 +17,7 @@ static void	assign_errors(t_data *data, char *error_message,
 {
 	data->error_message = error_message;
 	data->error_path = error_path;
-	data->ret_error = ret;
+	data->ret_value = ret;
 }
 
 void	execute_errors(t_data *data, int ret_value, bool invalid)
@@ -41,7 +41,14 @@ void	execute_errors(t_data *data, int ret_value, bool invalid)
 	ft_dprintf(STDERR_FILENO, "pipex: %s: %s\n",
 		data->error_path, data->error_message);
 	free_struct(data, true, true);
-	exit(data->ret_error);
+	exit(data->ret_value);
+}
+
+void	exit_error_command(t_data *data, bool fd1, bool fd2, char *command)
+{
+	free_struct(data, fd1, fd2);
+	perror(command);
+	exit(EXIT_FAILURE);
 }
 
 void	error_file(t_data *data, char *filename)

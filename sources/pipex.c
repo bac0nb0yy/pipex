@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/10 16:47:58 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/12 05:59:54 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ static void	pipes(t_data *data)
 	{
 		data->fd1 = open(data->input_file, O_RDONLY);
 		if (data->fd1 == -1)
-			return (error_file(data, data->input_file));
+			error_file(data, data->input_file);
 		dup2(data->fd1, STDIN_FILENO);
 	}
 	else
@@ -27,18 +27,14 @@ static void	pipes(t_data *data)
 	{
 		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 		if (data->fd2 == -1)
-			return (error_file(data, data->output_file));
+			error_file(data, data->output_file);
 		dup2(data->fd2, STDOUT_FILENO);
 	}
 	else
 		dup2(data->pipe[1], STDOUT_FILENO);
 	if (data->prev_pipe != -1)
-	{
-		if (!ft_close(data->prev_pipe))
-			exit(EXIT_FAILURE);
-	}
-	if (!free_struct(data, true, true))
-		exit(EXIT_FAILURE);
+		close(data->prev_pipe);
+	free_struct(data, true, true);
 }
 
 static void	exec(t_data *data)
@@ -47,12 +43,11 @@ static void	exec(t_data *data)
 	bool	invalid;
 
 	invalid = false;
-	ret_value = -1;
 	if (!get_cmd_path(data))
-		return (free_struct(data, true, true),
+		return (free_struct(data, false, false),
 			perror("malloc"), exit(EXIT_FAILURE));
 	if (data->cmd_path == NULL)
-	ret_value = RET_COMMAND_NOT_FOUND;
+		ret_value = RET_COMMAND_NOT_FOUND;
 	else if (access(data->cmd_path, F_OK) != 0)
 	{
 		if (errno == ENOTDIR || errno == EISDIR)
@@ -70,56 +65,49 @@ static void	exec(t_data *data)
 	execute_errors(data, ret_value, invalid);
 }
 
-static bool	wait_commands(t_data *data)
+static int	wait_commands(t_data *data)
 {
-	int	i;
-
-	i = 0;
-	while (i < data->nb_cmds)
+	while (1)
 	{
-		data->waitpid = wait(&data->ret_value);
+		data->waitpid = wait(&data->waitstatus);
 		if (data->waitpid == -1)
-			return (perror("wait"), false);
-		if (data->waitpid == data->pid)
-		{
-			if (WIFEXITED(data->ret_value))
-				data->ret_value = WEXITSTATUS(data->ret_value);
-			else
-				data->ret_value = 128 + WTERMSIG(data->ret_value);
 			break ;
-		}
-		i++;
+		if (data->waitpid != data->pid || data->ret_value != EXIT_SUCCESS)
+			continue ;
+		if (WIFEXITED(data->waitstatus))
+			data->ret_value = WEXITSTATUS(data->waitstatus);
+		else
+			data->ret_value = 128 + WTERMSIG(data->waitstatus);
 	}
-	return (true);
+	return (data->ret_value);
 }
 
-static bool	pipex(t_data *data)
+static int	pipex(t_data *data)
 {
 	while (data->cmd_id < data->nb_cmds)
 	{
 		pipe(data->pipe);
 		data->pid = fork();
+		if (data->pid == -1)
+			exit_error_command(data, true, true, "fork");
 		if (data->pid == 0)
 		{
 			pipes(data);
 			if (!parse_path(data, data->env) || !init_cmds(data))
-				(free_struct(data, false, false),
-					perror("malloc"), exit(EXIT_FAILURE));
+				exit_error_command(data, false, false, "malloc");
 			exec(data);
 		}
 		else
 		{
-			if (data->prev_pipe != -1 && !ft_close(data->prev_pipe))
-				return (free_struct(data, true, true), false);
+			if (data->prev_pipe != -1)
+				close(data->prev_pipe);
 			data->prev_pipe = data->pipe[0];
-			if (data->pipe[1] != -1 && !ft_close(data->pipe[1]))
-				return (free_struct(data, true, false), false);
+			close(data->pipe[1]);
 		}
 		++data->cmd_id;
 	}
-	if (!free_struct(data, true, false) || !wait_commands(data))
-		return (false);
-	return (true);
+	free_struct(data, true, false);
+	return (wait_commands(data));
 }
 
 int	main(int ac, char **av, char **env)
@@ -128,8 +116,5 @@ int	main(int ac, char **av, char **env)
 
 	if (!init_data(&data, ac, av, env))
 		return (EXIT_FAILURE);
-	if (!pipex(&data))
-		return (EXIT_FAILURE);
-	free_struct(&data, false, false);
-	return (data.ret_value);
+	return (pipex(&data));
 }

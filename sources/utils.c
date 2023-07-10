@@ -12,23 +12,13 @@
 
 #include "pipex.h"
 
-bool	ft_close(int fd)
-{
-	if (close(fd) == -1)
-		return (false);
-	return (true);
-}
-
 bool	get_cmd_path(t_data *data)
 {
 	int		i;
 	char	*tmp;
 
 	if (ft_strchr(data->command[0], '/'))
-	{
-		data->cmd_path = data->command[0];
-		return (true);
-	}
+		return (data->cmd_path = data->command[0], true);
 	i = 0;
 	while (data->paths[i])
 	{

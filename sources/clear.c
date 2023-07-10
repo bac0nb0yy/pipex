@@ -12,45 +12,35 @@
 
 #include "pipex.h"
 
-static bool	close_pipes(t_data *data, bool fd1, bool fd2)
+static void	close_pipes(t_data *data, bool fd1, bool fd2)
 {
 	if (fd1 && data->pipe[0] != -1)
-	{
-		if (!ft_close(data->pipe[0]))
-			return (false);
-	}
+		close(data->pipe[0]);
 	if (fd2 && data->pipe[1] != -1)
-	{
-		if (!ft_close(data->pipe[1]))
-			return (false);
-	}
-	return (true);
+		close(data->pipe[1]);
 }
 
-bool	free_struct(t_data *data, bool fd1, bool fd2)
+void	free_struct(t_data *data, bool fd1, bool fd2)
 {
 	ft_free_2d_array(data->command);
 	ft_free_2d_array(data->paths);
 	free(data->cmd_path);
-	if (!close_pipes(data, fd1, fd2) || !clear_valid_fd(data))
-		return (false);
-	return (true);
+	if (data->prev_pipe != -1)
+		close(data->prev_pipe);
+	close_pipes(data, fd1, fd2);
+	clear_valid_fd(data);
 }
 
-bool	clear_valid_fd(t_data *data)
+void	clear_valid_fd(t_data *data)
 {
 	const int	fds[] = {data->fd1, data->fd2};
-	int			i;
+	size_t		i;
 
 	i = 0;
-	while (i < 2)
+	while (i < sizeof(fds) / sizeof(fds[0]))
 	{
 		if (fds[i] != -1)
-		{
-			if (!ft_close(fds[i]))
-				return (false);
-		}
+			close(fds[i]);
 		i++;
 	}
-	return (true);
 }
