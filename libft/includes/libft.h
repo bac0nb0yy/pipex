@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/04 18:52:21 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/05/11 06:08:28 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/10 06:39:19 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,21 @@ int		ft_max(int a, int b);
 
 int		ft_min(int a, int b);
 
-bool	ft_compstr(char *s1, char *s2);
+bool	ft_strcomp(char *s1, char *s2);
 
 char	*ft_longest_array(char *s1, char*s2);
 
 void	swap_xor(int *a, int *b);
+
+bool	ft_startswith(char *str, char *start);
+
+bool	ft_endswith(char *str, char *start);
+
+bool	ft_dprintf_bool(int fd, char *str, bool value);
+
+void	ft_free_2d_array(char **array);
+
+void	ft_free_3d_array(char ***array);
+
+char	*join_three(char const *s1, char const *s2, char const *s3);
 #endif

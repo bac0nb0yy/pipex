@@ -6,15 +6,16 @@
 #    By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/11 05:11:21 by dtelnov           #+#    #+#              #
-#    Updated: 2023/05/13 04:57:22 by dtelnov          ###   ########.fr        #
+#    Updated: 2023/07/10 17:09:27 by dtelnov          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = pipex
+BONUS = pipex_bonus
 PROJECT_NAME = pipex
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g3 -I includes/ -I libft/includes/
+CFLAGS = -Wall -Wextra -Werror -g3 -I includes/ -I libft/includes/ -g3
 LIBFT = -L libft -lft
 RM = rm -rf
 
@@ -44,6 +45,10 @@ BWHITE = \033[1;37m
 SRC_DIR = sources/
 
 FILES = pipex \
+		init \
+		utils \
+		clear \
+		errors \
 
 SRCS = 	$(addsuffix .c, $(addprefix $(SRC_DIR), $(FILES)))
 
@@ -62,13 +67,14 @@ $(NAME): $(OBJS)
 	@printf "$(BBLACK)[%1d/%1d] 100%%\t$(BWHITE)All files have been compiled ✔️$(NC)\n" $(COUNT) $(TOTAL)
 	@echo "[💠] $(BBLACK)$(NAME)\t$(BWHITE)Executable created ✔️\n$(NC)"
 
-bonus: all
-
 %.o: %.c
 	@printf "[🔄] $(BPURPLE)Generating $(PROJECT_NAME) objects... %-33.33s\r$(NC)" $@
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@$(eval COUNT=$(shell echo $$(($(COUNT)+1))))
 	@$(eval PERCENT:=$(shell echo $$((100*$(COUNT)/$(TOTAL)))))
+
+bonus: all
+	@cp $(NAME) $(BONUS)
 
 clean:
 	@$(RM) $(OBJS)
@@ -77,6 +83,7 @@ clean:
 
 fclean: clean
 	@$(RM) $(NAME)
+	@$(RM) $(BONUS)
 	@make --no-print-directory fclean -C libft/
 	@echo "[🚮] $(BRED)All $(RED)files have been cleaned ✔️$(NC)"
 

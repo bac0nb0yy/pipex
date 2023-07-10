@@ -6,138 +6,130 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/05/17 21:09:39 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/10 16:47:58 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-bool	ft_startwith(char *str, char *start)
+static void	pipes(t_data *data)
 {
-	const int	start_len = ft_strlen(start);
-	int			i;
-
-	i = 0;
-	while (i < start_len)
+	if (data->cmd_id == 0)
 	{
-		if (str[i] != start[i])
-			return (false);
-		++i;
+		data->fd1 = open(data->input_file, O_RDONLY);
+		if (data->fd1 == -1)
+			return (error_file(data, data->input_file));
+		dup2(data->fd1, STDIN_FILENO);
 	}
-	return (true);
+	else
+		dup2(data->prev_pipe, STDIN_FILENO);
+	if (data->cmd_id == data->nb_cmds - 1)
+	{
+		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+		if (data->fd2 == -1)
+			return (error_file(data, data->output_file));
+		dup2(data->fd2, STDOUT_FILENO);
+	}
+	else
+		dup2(data->pipe[1], STDOUT_FILENO);
+	if (data->prev_pipe != -1)
+	{
+		if (!ft_close(data->prev_pipe))
+			exit(EXIT_FAILURE);
+	}
+	if (!free_struct(data, true, true))
+		exit(EXIT_FAILURE);
 }
 
-char	**parse_path(char **env)
+static void	exec(t_data *data)
+{
+	int		ret_value;
+	bool	invalid;
+
+	invalid = false;
+	ret_value = -1;
+	if (!get_cmd_path(data))
+		return (free_struct(data, true, true),
+			perror("malloc"), exit(EXIT_FAILURE));
+	if (data->cmd_path == NULL)
+	ret_value = RET_COMMAND_NOT_FOUND;
+	else if (access(data->cmd_path, F_OK) != 0)
+	{
+		if (errno == ENOTDIR || errno == EISDIR)
+			ret_value = RET_CANNOT_EXECUTE;
+		else
+			ret_value = RET_COMMAND_NOT_FOUND;
+		invalid = true;
+	}
+	else
+	{
+		ft_free_2d_array(data->paths);
+		execve(data->cmd_path, data->command, data->env);
+		ret_value = RET_CANNOT_EXECUTE;
+	}
+	execute_errors(data, ret_value, invalid);
+}
+
+static bool	wait_commands(t_data *data)
 {
 	int	i;
 
 	i = 0;
-	while (env[i])
+	while (i < data->nb_cmds)
 	{
-		if (ft_startwith(env[i], "PATH="))
-			return (ft_split(env[i] + 5, ':'));
-		++i;
+		data->waitpid = wait(&data->ret_value);
+		if (data->waitpid == -1)
+			return (perror("wait"), false);
+		if (data->waitpid == data->pid)
+		{
+			if (WIFEXITED(data->ret_value))
+				data->ret_value = WEXITSTATUS(data->ret_value);
+			else
+				data->ret_value = 128 + WTERMSIG(data->ret_value);
+			break ;
+		}
+		i++;
 	}
-	return (NULL);
+	return (true);
 }
 
-char	*join_three_args(const char *path, char *delimiter, char *cmd)
+static bool	pipex(t_data *data)
 {
-	char		*ret;
-	const int	path_len = ft_strlen(path);
-	const int	delimiter_len = ft_strlen(delimiter);
-	const int	cmd_len = ft_strlen(cmd);
-
-	if (!path)
-		return (NULL);
-	if (!cmd)
+	while (data->cmd_id < data->nb_cmds)
 	{
-		ret = malloc(path_len + delimiter_len + 1);
-		ft_memmove(ret, path, path_len);
-		ft_memmove(ret + path_len, delimiter, delimiter_len + 1);
-		return (ret);
+		pipe(data->pipe);
+		data->pid = fork();
+		if (data->pid == 0)
+		{
+			pipes(data);
+			if (!parse_path(data, data->env) || !init_cmds(data))
+				(free_struct(data, false, false),
+					perror("malloc"), exit(EXIT_FAILURE));
+			exec(data);
+		}
+		else
+		{
+			if (data->prev_pipe != -1 && !ft_close(data->prev_pipe))
+				return (free_struct(data, true, true), false);
+			data->prev_pipe = data->pipe[0];
+			if (data->pipe[1] != -1 && !ft_close(data->pipe[1]))
+				return (free_struct(data, true, false), false);
+		}
+		++data->cmd_id;
 	}
-	ret = malloc(path_len + delimiter_len + cmd_len + 1);
-	ft_memmove(ret, path, path_len);
-	ft_memmove(ret + path_len, delimiter, delimiter_len);
-	ft_memmove(ret + path_len + delimiter_len, cmd, cmd_len + 1);
-	return (ret);
-}
-
-void	fork_one(int fd1, int fds[], char **av, char **env)
-{
-	const char	**paths = (const char **) parse_path(env);
-	const char	**args = (const char **) ft_split(av[2], ' ');
-	char		*curr;
-	int			i;
-
-	dup2(fd1, 0);
-	dup2(fds[1], 1);
-	close(fds[0]);
-	close(fd1);
-	i = 0;
-	while (paths[i])
-	{
-		curr = join_three_args(paths[i], "/", (char *)args[0]);
-		execve(curr, (char *const *)args, env);
-		free(curr);
-		++i;
-	}
-}
-
-void	fork_two(int fd2, int fds[], char **av, char **env)
-{
-	const char	**paths = (const char **) parse_path(env);
-	const char	**args = (const char **) ft_split(av[3], ' ');
-	char		*curr;
-	int			i;
-
-	dup2(fd2, 1);
-	dup2(fds[0], 0);
-	close(fds[1]);
-	close(fd2);
-	i = 0;
-	while (paths[i])
-	{
-		curr = join_three_args(paths[i], "/", (char *)args[0]);
-		execve(curr, (char *const *)args, env);
-		free(curr);
-		++i;
-	}
-}
-
-void	pipex(int fd1, int fd2, char **av, char **env)
-{
-	int		fds[2];
-	int		status;
-	pid_t	child1;
-	pid_t	child2;
-
-	pipe(fds);
-	child1 = fork();
-	// if (child1 < 0)
-		// TODO
-	if (child1 == 0)
-		fork_one(fd1, fds, av, env);
-	child2 = fork();
-	// if (child2 < 0)
-		// 	TODO
-	if (child2 == 0)
-		fork_two(fd2, fds, av, env);
-	close(fds[0]);
-	close(fds[1]);
-	waitpid(child1, &status, 0);
-	waitpid(child2, &status, 0);
+	if (!free_struct(data, true, false) || !wait_commands(data))
+		return (false);
+	return (true);
 }
 
 int	main(int ac, char **av, char **env)
 {
-	int			fd1;
-	int			fd2;
+	t_data		data;
 
-	(void) ac;
-	fd1 = open(av[1], O_RDONLY);
-	fd2 = open(av[4], O_WRONLY);
-	pipex(fd1, fd2, av, env);
-	return (0);
+	if (!init_data(&data, ac, av, env))
+		return (EXIT_FAILURE);
+	if (!pipex(&data))
+		return (EXIT_FAILURE);
+	free_struct(&data, false, false);
+	return (data.ret_value);
 }
