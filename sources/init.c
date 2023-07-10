@@ -50,7 +50,7 @@ bool	init_cmds(t_data *data)
 	return (true);
 }
 
-static bool	init_args(t_data *data, int ac, char **av, char **env)
+static void	init_args(t_data *data, int ac, char **av, char **env)
 {
 	const bool	bonus = ft_endswith(av[0], "_bonus");
 
@@ -58,9 +58,9 @@ static bool	init_args(t_data *data, int ac, char **av, char **env)
 	if (bonus)
 	{
 		if (data->is_heredoc && ac < 6)
-			return (ft_dprintf_bool(STDERR_FILENO, USAGE_B_HEREDOC, false));
+			(ft_dprintf(STDERR_FILENO, USAGE_B_HEREDOC), exit(EXIT_FAILURE));
 		if (ac < 5)
-			return (ft_dprintf_bool(STDERR_FILENO, USAGE_B_NOHEREDOC, false));
+			(ft_dprintf(STDERR_FILENO, USAGE_B_NOHEREDOC), exit(EXIT_FAILURE));
 		data->limiter = av[2];
 		if (!data->is_heredoc)
 			data->input_file = av[1];
@@ -68,18 +68,17 @@ static bool	init_args(t_data *data, int ac, char **av, char **env)
 	}
 	else
 	{
-		if (ac < 5 || ac > 6)
-			return (ft_dprintf_bool(STDERR_FILENO, USAGE_M, false));
+		if (ac != 5)
+			(ft_dprintf(STDERR_FILENO, USAGE_M), exit(EXIT_FAILURE));
 		data->input_file = av[1];
 		data->output_file = av[ac - 1];
 	}
 	data->nb_cmds = ac - 3 - data->is_heredoc;
 	data->env = env;
 	data->av = av;
-	return (true);
 }
 
-static bool	init_data_values(t_data *data)
+static void	init_data_values(t_data *data)
 {
 	data->pipe[0] = -1;
 	data->pipe[1] = -1;
@@ -94,13 +93,11 @@ static bool	init_data_values(t_data *data)
 	data->error_message = NULL;
 	data->error_path = NULL;
 	data->exec = false;
-	return (true);
 }
 
 bool	init_data(t_data *data, int ac, char **av, char **env)
 {
-	if (!init_args(data, ac, av, env) || !init_data_values(data))
-		return (false);
+	(init_args(data, ac, av, env), init_data_values(data));
 	if (data->is_heredoc && !init_heredoc(data))
 		return (false);
 	return (true);
