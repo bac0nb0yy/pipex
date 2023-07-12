@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/12 08:06:48 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/12 10:28:19 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 static void	pipes(t_data *data)
 {
-	if (data->cmd_id == 0)
+	if (data->cmd_id + data->is_heredoc == 0)
 	{
 		data->fd1 = open(data->input_file, O_RDONLY);
 		if (data->fd1 == -1)

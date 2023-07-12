@@ -12,6 +12,35 @@
 
 #include "pipex.h"
 
+bool	init_heredoc(t_data *data)
+{
+	bool		read_status;
+	t_heredoc	heredoc;
+	pid_t		child_pid;
+
+	pipe(data->pipe);
+	read_status = read_heredoc(&heredoc, data);
+	if (!read_status)
+	{
+		free_heredoc(&heredoc);
+		(close(data->pipe[0]), close(data->pipe[1]));
+		return (false);
+	}
+	child_pid = fork();
+	if (child_pid == 0)
+	{
+		close(data->pipe[0]);
+		(write_heredoc(&heredoc, data->pipe[1]), free_heredoc(&heredoc));
+		close(data->pipe[1]);
+		exit(EXIT_SUCCESS);
+	}
+	close(data->pipe[1]);
+	free_heredoc(&heredoc);
+	data->heredoc_pid = child_pid;
+	data->prev_pipe = data->pipe[0];
+	return (true);
+}
+
 bool	init_cmds(t_data *data)
 {
 	data->command = ft_split(data->av[2 + data->cmd_id
@@ -33,7 +62,8 @@ static bool	init_args(t_data *data, int ac, char **av, char **env)
 		if (ac < 5)
 			return (ft_dprintf_bool(STDERR_FILENO, USAGE_B_NOHEREDOC, false));
 		data->limiter = av[2];
-		data->input_file = av[1];
+		if (!data->is_heredoc)
+			data->input_file = av[1];
 		data->output_file = av[ac - 1];
 	}
 	else
@@ -70,6 +100,8 @@ static bool	init_data_values(t_data *data)
 bool	init_data(t_data *data, int ac, char **av, char **env)
 {
 	if (!init_args(data, ac, av, env) || !init_data_values(data))
+		return (false);
+	if (data->is_heredoc && !init_heredoc(data))
 		return (false);
 	return (true);
 }

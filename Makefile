@@ -6,7 +6,7 @@
 #    By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/11 05:11:21 by dtelnov           #+#    #+#              #
-#    Updated: 2023/07/10 17:09:27 by dtelnov          ###   ########.fr        #
+#    Updated: 2023/07/12 09:04:39 by dtelnov          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,6 +49,7 @@ FILES = pipex \
 		utils \
 		clear \
 		errors \
+		heredoc \
 
 SRCS = 	$(addsuffix .c, $(addprefix $(SRC_DIR), $(FILES)))
 

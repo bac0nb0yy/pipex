@@ -74,10 +74,14 @@ char	*add_buf_to_save(char *save, char *buffer)
 {
 	char	*tmp;
 
-	tmp = save;
-	save = ft_strjoin(save, buffer);
-	free(tmp);
-	return (save);
+	if (save)
+	{
+		tmp = save;
+		save = ft_strjoin(save, buffer);
+		free(tmp);
+		return (save);
+	}
+	return (ft_strdup(buffer));
 }
 
 char	*read_line(char *save, char *buffer, int fd)
@@ -94,8 +98,6 @@ char	*read_line(char *save, char *buffer, int fd)
 			return (NULL);
 		}
 		buffer[rd] = 0;
-		if (!save)
-			save = ft_calloc(1, 1);
 		save = add_buf_to_save(save, buffer);
 		if (ft_strchr(save, '\n') != NULL)
 			break ;
