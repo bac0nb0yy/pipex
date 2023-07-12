@@ -6,7 +6,7 @@
 #    By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/09/24 04:45:01 by dtelnov           #+#    #+#              #
-#    Updated: 2023/07/10 06:39:27 by dtelnov          ###   ########.fr        #
+#    Updated: 2023/07/12 07:54:42 by dtelnov          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -49,7 +49,7 @@ FTMEM = bzero calloc memchr memcmp memcpy memmove memset
 
 FTPUT = char_fd endl_fd nbr_fd str_fd
 
-FTSTR = strchr strdup striteri strjoin strlcat strlcpy strlen strmapi strncmp strnstr strrchr strtrim longest_array strcomp startswith endswith free_2d_array free_3d_array join_three
+FTSTR = strchr strdup striteri strjoin strlcat strlcpy strlen strmapi strncmp strnstr strrchr strtrim longest_array strcomp startswith endswith free_2d_array join_three
 
 FTSUB = ft_str/ft_substr ft_str/ft_split
 

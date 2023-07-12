@@ -63,6 +63,7 @@ static bool	init_data_values(t_data *data)
 	data->paths = NULL;
 	data->error_message = NULL;
 	data->error_path = NULL;
+	data->exec = false;
 	return (true);
 }
 

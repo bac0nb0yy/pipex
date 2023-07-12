@@ -17,8 +17,13 @@ bool	get_cmd_path(t_data *data)
 	int		i;
 	char	*tmp;
 
+	if (!data->command[0])
+		return (true);
 	if (ft_strchr(data->command[0], '/'))
-		return (data->cmd_path = data->command[0], true);
+		return (data->cmd_path = ft_strdup(data->command[0]), true);
+	if (!data->command[0][0] || data->command[0][0] == '.'
+		|| data->paths == NULL)
+		return (true);
 	i = 0;
 	while (data->paths[i])
 	{

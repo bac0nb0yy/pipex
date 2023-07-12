@@ -20,10 +20,11 @@ static void	close_pipes(t_data *data, bool fd1, bool fd2)
 		close(data->pipe[1]);
 }
 
-void	free_struct(t_data *data, bool fd1, bool fd2)
+void	free_struct(t_data *data, bool fd1, bool fd2, bool exec)
 {
-	ft_free_2d_array(data->command);
-	ft_free_2d_array(data->paths);
+	ft_free_2d_array((void ***)&data->command);
+	if (!exec)
+		ft_free_2d_array((void ***)&data->paths);
 	free(data->cmd_path);
 	if (data->prev_pipe != -1)
 		close(data->prev_pipe);

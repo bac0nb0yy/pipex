@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/12 05:59:54 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/12 08:06:48 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	pipes(t_data *data)
 		dup2(data->prev_pipe, STDIN_FILENO);
 	if (data->cmd_id == data->nb_cmds - 1)
 	{
-		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (data->fd2 == -1)
 			error_file(data, data->output_file);
 		dup2(data->fd2, STDOUT_FILENO);
@@ -34,7 +34,7 @@ static void	pipes(t_data *data)
 		dup2(data->pipe[1], STDOUT_FILENO);
 	if (data->prev_pipe != -1)
 		close(data->prev_pipe);
-	free_struct(data, true, true);
+	free_struct(data, true, true, false);
 }
 
 static void	exec(t_data *data)
@@ -43,9 +43,9 @@ static void	exec(t_data *data)
 	bool	invalid;
 
 	invalid = false;
+	data->exec = false;
 	if (!get_cmd_path(data))
-		return (free_struct(data, false, false),
-			perror("malloc"), exit(EXIT_FAILURE));
+		exit_error_command(data, false, false, "malloc");
 	if (data->cmd_path == NULL)
 		ret_value = RET_COMMAND_NOT_FOUND;
 	else if (access(data->cmd_path, F_OK) != 0)
@@ -58,11 +58,12 @@ static void	exec(t_data *data)
 	}
 	else
 	{
-		ft_free_2d_array(data->paths);
+		ft_free_2d_array((void ***)&data->paths);
+		data->exec = true;
 		execve(data->cmd_path, data->command, data->env);
 		ret_value = RET_CANNOT_EXECUTE;
 	}
-	execute_errors(data, ret_value, invalid);
+	execute_errors(data, ret_value, invalid, data->exec);
 }
 
 static int	wait_commands(t_data *data)
@@ -106,7 +107,7 @@ static int	pipex(t_data *data)
 		}
 		++data->cmd_id;
 	}
-	free_struct(data, true, false);
+	free_struct(data, true, false, false);
 	return (wait_commands(data));
 }
 

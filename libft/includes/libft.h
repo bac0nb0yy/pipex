@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/04 18:52:21 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/10 06:39:19 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/12 07:54:53 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,9 +131,7 @@ bool	ft_endswith(char *str, char *start);
 
 bool	ft_dprintf_bool(int fd, char *str, bool value);
 
-void	ft_free_2d_array(char **array);
-
-void	ft_free_3d_array(char ***array);
+void	ft_free_2d_array(void ***ptr);
 
 char	*join_three(char const *s1, char const *s2, char const *s3);
 #endif

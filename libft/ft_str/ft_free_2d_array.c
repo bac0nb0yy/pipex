@@ -12,17 +12,27 @@
 
 #include "libft.h"
 
-void	ft_free_2d_array(char **array)
+void	ft_free_2d_array(void ***ptr)
 {
-	int	i;
+	size_t	i;
+	void	**arr;
 
-	if (!array || !*array)
+	if (*ptr == NULL)
 		return ;
+	arr = *ptr;
 	i = 0;
-	while (array[i])
+	while (arr[i])
 	{
-		free(array[i]);
-		i++;
+		if (*(arr + i) != NULL)
+		{
+			free(*(arr + i));
+			*(arr + i) = NULL;
+		}
+		++i;
 	}
-	free(array);
+	if (*((void **)ptr) != NULL)
+	{
+		free(*((void **)ptr));
+		*((void **)ptr) = NULL;
+	}
 }
