@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*   ft_printf_all.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:14:50 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/06/28 01:47:51 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/15 18:29:52 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,14 +85,15 @@ int	ft_dprintf(int fd, const char *s, ...)
 	va_start(args, s);
 	va_start(args_bis, s);
 	display = ft_sprintf(s, args, args_bis);
-	if (!display)
-		return (va_end(args), va_end(args_bis), -1);
 	va_end(args);
 	va_end(args_bis);
+	if (!display)
+		return (-1);
 	va_start(args_third, s);
 	ret = ft_arglen(s, args_third);
 	va_end(args_third);
-	write(fd, display, ret);
+	if (write(fd, display, ret) != ret)
+		return (free(display), -1);
 	free(display);
 	return (ret);
 }
@@ -108,14 +109,15 @@ int	ft_printf(const char *s, ...)
 	va_start(args, s);
 	va_start(args_bis, s);
 	display = ft_sprintf(s, args, args_bis);
-	if (!display)
-		return (va_end(args), va_end(args_bis), -1);
 	va_end(args);
 	va_end(args_bis);
+	if (!display)
+		return (-1);
 	va_start(args_third, s);
 	ret = ft_arglen(s, args_third);
 	va_end(args_third);
-	write(1, display, ret);
+	if (write(1, display, ret) != ret)
+		return (free(display), -1);
 	free(display);
 	return (ret);
 }

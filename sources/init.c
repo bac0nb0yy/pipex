@@ -18,25 +18,23 @@ bool	init_heredoc(t_data *data)
 	t_heredoc	heredoc;
 	pid_t		child_pid;
 
-	pipe(data->pipe);
+	if (pipe(data->pipe) == -1)
+		return (false);
 	read_status = read_heredoc(&heredoc, data);
 	if (!read_status)
-	{
-		free_heredoc(&heredoc);
-		(close(data->pipe[0]), close(data->pipe[1]));
-		return (false);
-	}
+		return (free_heredoc(&heredoc), close_pipes(data, true, true), false);
 	child_pid = fork();
+	if (child_pid == -1)
+		return (free_heredoc(&heredoc), close_pipes(data, true, true), false);
 	if (child_pid == 0)
 	{
-		close(data->pipe[0]);
-		(write_heredoc(&heredoc, data->pipe[1]), free_heredoc(&heredoc));
-		close(data->pipe[1]);
+		(write_heredoc(&heredoc, data), free_heredoc(&heredoc));
+		get_next_line(GNL_FREE);
+		close_pipes(data, true, true);
 		exit(EXIT_SUCCESS);
 	}
+	(get_next_line(GNL_FREE), free_heredoc(&heredoc));
 	close(data->pipe[1]);
-	free_heredoc(&heredoc);
-	data->heredoc_pid = child_pid;
 	data->prev_pipe = data->pipe[0];
 	return (true);
 }
@@ -45,9 +43,7 @@ bool	init_cmds(t_data *data)
 {
 	data->command = ft_split(data->av[2 + data->cmd_id
 			+ data->is_heredoc], ' ');
-	if (!data->command)
-		return (false);
-	return (true);
+	return (data->command != NULL);
 }
 
 static void	init_args(t_data *data, int ac, char **av, char **env)
@@ -97,8 +93,7 @@ static void	init_data_values(t_data *data)
 
 bool	init_data(t_data *data, int ac, char **av, char **env)
 {
-	(init_args(data, ac, av, env), init_data_values(data));
-	if (data->is_heredoc && !init_heredoc(data))
-		return (false);
-	return (true);
+	init_args(data, ac, av, env);
+	init_data_values(data);
+	return (!data->is_heredoc || init_heredoc(data));
 }

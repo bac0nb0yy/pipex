@@ -21,8 +21,7 @@ bool	get_cmd_path(t_data *data)
 		return (true);
 	if (ft_strchr(data->command[0], '/'))
 		return (data->cmd_path = ft_strdup(data->command[0]), true);
-	if (!data->command[0][0] || data->command[0][0] == '.'
-		|| data->paths == NULL)
+	if (!data->command[0][0] || !data->paths)
 		return (true);
 	i = 0;
 	while (data->paths[i])

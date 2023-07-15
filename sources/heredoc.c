@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/12 09:04:23 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/12 14:13:44 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/15 18:17:51 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,24 +66,30 @@ bool	read_heredoc(t_heredoc *heredoc, t_data *data)
 	{
 		ft_dprintf(STDIN_FILENO, "> ");
 		line = get_next_line(0);
+		if (!line)
+			return (perror("malloc"), false);
 		if (end_heredoc(line, data->limiter))
 			return (free(line), true);
 		if (!push_back_heredoc(heredoc, line))
-			return (ft_dprintf_bool(STDERR_FILENO, "Error: Heap full\n", false));
+			return (ft_dprintf_bool(STDERR_FILENO,
+					"Error: Heap full or malloc error\n", false));
 	}
 }
 
-void	write_heredoc(t_heredoc *heredoc, int write_fd)
+void	write_heredoc(t_heredoc *heredoc, t_data *data)
 {
 	t_heredoc_line	*current;
 	long			line_len;
+	int				write_fd;
 
+	write_fd = data->pipe[1];
 	current = heredoc->first;
 	while (current)
 	{
 		line_len = ft_strlen(current->line);
 		if (write(write_fd, current->line, line_len) != line_len)
-			(perror("write"), exit(EXIT_FAILURE));
+			(perror("write"), free_heredoc(heredoc),
+				close_pipes(data, true, true), exit(EXIT_FAILURE));
 		current = current->next;
 	}
 }

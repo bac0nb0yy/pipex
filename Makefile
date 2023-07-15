@@ -6,7 +6,7 @@
 #    By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/05/11 05:11:21 by dtelnov           #+#    #+#              #
-#    Updated: 2023/07/12 09:04:39 by dtelnov          ###   ########.fr        #
+#    Updated: 2023/07/15 19:33:07 by dtelnov          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ BONUS = pipex_bonus
 PROJECT_NAME = pipex
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g3 -I includes/ -I libft/includes/ -g3
+CFLAGS = -Wall -Wextra -Werror -I includes/ -I libft/includes/
 LIBFT = -L libft -lft
 RM = rm -rf
 
@@ -65,8 +65,8 @@ $(NAME): $(OBJS)
 	@echo "\n\n[🔘] $(BGREEN)Compiling $(PROJECT_NAME)..."
 	@$(CC) $(CFLAGS) $(SRCS) -o $(NAME) $(LIBFT)
 	@echo "$(NC)"
-	@printf "$(BBLACK)[%1d/%1d] 100%%\t$(BWHITE)All files have been compiled ✔️$(NC)\n" $(COUNT) $(TOTAL)
-	@echo "[💠] $(BBLACK)$(NAME)\t$(BWHITE)Executable created ✔️\n$(NC)"
+	@printf "$(BPURPLE)[%1d/%1d] 100%%\t$(BWHITE)All files have been compiled ✔️$(NC)\n" $(COUNT) $(TOTAL)
+	@echo "[💠] $(BPURPLE)$(NAME)\t$(BWHITE)Executable created ✔️\n$(NC)"
 
 %.o: %.c
 	@printf "[🔄] $(BPURPLE)Generating $(PROJECT_NAME) objects... %-33.33s\r$(NC)" $@
@@ -88,6 +88,6 @@ fclean: clean
 	@make --no-print-directory fclean -C libft/
 	@echo "[🚮] $(BRED)All $(RED)files have been cleaned ✔️$(NC)"
 
-re: clean $(NAME)
+re: fclean $(NAME)
 
 .PHONY: bonus all clean fclean re

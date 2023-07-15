@@ -12,7 +12,7 @@
 
 #include "pipex.h"
 
-static void	close_pipes(t_data *data, bool fd1, bool fd2)
+void	close_pipes(t_data *data, bool fd1, bool fd2)
 {
 	if (fd1 && data->pipe[0] != -1)
 		close(data->pipe[0]);
@@ -25,7 +25,8 @@ void	free_struct(t_data *data, bool fd1, bool fd2, bool exec)
 	ft_free_2d_array((void ***)&data->command);
 	if (!exec)
 		ft_free_2d_array((void ***)&data->paths);
-	free(data->cmd_path);
+	if (data->cmd_path)
+		free(data->cmd_path);
 	if (data->prev_pipe != -1)
 		close(data->prev_pipe);
 	close_pipes(data, fd1, fd2);

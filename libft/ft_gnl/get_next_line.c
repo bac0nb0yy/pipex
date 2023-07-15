@@ -108,10 +108,20 @@ char	*read_line(char *save, char *buffer, int fd)
 
 char	*get_next_line(int fd)
 {
-	static char	*save[1024];
+	static char	*save[MAX_FD];
 	char		*buffer;
 	char		*line;
+	int			i;
 
+	if (fd == GNL_FREE)
+	{
+		i = 0;
+		while (i < MAX_FD)
+		{
+			free(save[i]);
+			save[i++] = NULL;
+		}
+	}
 	if (BUFFER_SIZE <= 0 || fd < 0)
 		return (NULL);
 	buffer = malloc(BUFFER_SIZE + 1);

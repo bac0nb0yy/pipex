@@ -21,9 +21,13 @@
 # include <unistd.h>
 # include <stdlib.h>
 
+# define GNL_FREE -42
+# define MAX_FD 1024
+
 char	*get_next_line(int fd);
 char	*first_line(char *save);
 char	*next_line(char *save);
 char	*add_buf_to_save(char *save, char *buffer);
 char	*read_line(char *save, char *buffer, int fd);
+
 #endif

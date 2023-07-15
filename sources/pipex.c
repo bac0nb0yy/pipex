@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/12 10:28:19 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/15 19:19:07 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ static void	pipes(t_data *data)
 		dup2(data->prev_pipe, STDIN_FILENO);
 	if (data->cmd_id == data->nb_cmds - 1)
 	{
-		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		data->fd2 = open(data->output_file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 		if (data->fd2 == -1)
 			error_file(data, data->output_file);
 		dup2(data->fd2, STDOUT_FILENO);
@@ -87,7 +87,8 @@ static int	pipex(t_data *data)
 {
 	while (data->cmd_id < data->nb_cmds)
 	{
-		pipe(data->pipe);
+		if (pipe(data->pipe) == -1)
+			exit_error_command(data, false, false, "pipe");
 		data->pid = fork();
 		if (data->pid == -1)
 			exit_error_command(data, true, true, "fork");
