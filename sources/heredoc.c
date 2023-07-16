@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/12 09:04:23 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/15 18:17:51 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:29:04 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ bool	read_heredoc(t_heredoc *heredoc, t_data *data)
 		ft_dprintf(STDIN_FILENO, "> ");
 		line = get_next_line(0);
 		if (!line)
-			return (perror("malloc"), false);
+			return (get_next_line(GNL_FREE), perror("malloc"), false);
 		if (end_heredoc(line, data->limiter))
 			return (free(line), true);
 		if (!push_back_heredoc(heredoc, line))
-			return (ft_dprintf_bool(STDERR_FILENO,
+			return (get_next_line(GNL_FREE), ft_dprintf_bool(STDERR_FILENO,
 					"Error: Heap full or malloc error\n", false));
 	}
 }

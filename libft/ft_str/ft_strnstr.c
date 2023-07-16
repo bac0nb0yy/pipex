@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 17:58:33 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/29 05:31:17 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:53:27 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ char	*ft_strnstr(const char *big, const char *little, size_t len)
 	size_t	i;
 	size_t	k;
 
-	if ((!big || !little) && len == 0)
+	if ((!big || !little) || len == 0)
 		return (NULL);
 	i = 0;
 	if (little[0] == 0)

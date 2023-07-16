@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/04 18:50:36 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/29 05:23:49 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:50:59 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 
 	i = 0;
 	ptr = dest;
-	if (!dest && !src)
+	if (!dest || !src)
 		return (NULL);
 	while (i < n)
 	{

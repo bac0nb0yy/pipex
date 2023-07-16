@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/24 03:05:37 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/08 21:08:49 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:53:40 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,6 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 			tmp = tmp->next;
 		tmp->next = new;
 	}
-	else
+	else if (lst)
 		*lst = new;
 }

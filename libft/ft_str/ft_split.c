@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/14 01:56:44 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/29 05:40:23 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:54:25 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ char	**ft_split(char const *s, char c)
 		{
 			tmp[index] = malloc(get_size_word(p, s, c) + 1);
 			if (!tmp[index])
-				free_all(tmp, index);
+				return (free_all(tmp, index), NULL);
 			fill_word(p, p + get_size_word(p, s, c), s, tmp[index]);
 			index++;
 		}

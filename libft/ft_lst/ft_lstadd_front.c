@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/24 02:49:08 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/08 21:09:07 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:52:00 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,6 @@ void	ft_lstadd_front(t_list **lst, t_list *new)
 		new->next = *lst;
 		*lst = new;
 	}
-	else
+	else if (lst)
 		*lst = new;
 }

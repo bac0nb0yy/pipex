@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/24 03:36:28 by dtelnov           #+#    #+#             */
-/*   Updated: 2022/11/08 20:05:15 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 21:49:17 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,5 +23,6 @@ void	ft_lstclear(t_list **lst, void (*del)(void *))
 		free(*lst);
 		*lst = tmp;
 	}
-	*lst = NULL;
+	if (lst)
+		*lst = NULL;
 }

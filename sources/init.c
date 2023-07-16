@@ -19,7 +19,7 @@ bool	init_heredoc(t_data *data)
 	pid_t		child_pid;
 
 	if (pipe(data->pipe) == -1)
-		return (false);
+		return (perror("pipe"), false);
 	read_status = read_heredoc(&heredoc, data);
 	if (!read_status)
 		return (free_heredoc(&heredoc), close_pipes(data, true, true), false);
@@ -57,7 +57,8 @@ static void	init_args(t_data *data, int ac, char **av, char **env)
 			(ft_dprintf(STDERR_FILENO, USAGE_B_HEREDOC), exit(EXIT_FAILURE));
 		if (ac < 5)
 			(ft_dprintf(STDERR_FILENO, USAGE_B_NOHEREDOC), exit(EXIT_FAILURE));
-		data->limiter = av[2];
+		if (data->is_heredoc)
+			data->limiter = av[2];
 		if (!data->is_heredoc)
 			data->input_file = av[1];
 		data->output_file = av[ac - 1];
