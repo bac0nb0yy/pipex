@@ -6,7 +6,7 @@
 /*   By: dtelnov <dtelnov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 03:08:49 by dtelnov           #+#    #+#             */
-/*   Updated: 2023/07/15 19:19:07 by dtelnov          ###   ########.fr       */
+/*   Updated: 2023/07/16 22:42:10 by dtelnov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ static void	exec(t_data *data)
 	data->exec = false;
 	if (!get_cmd_path(data))
 		exit_error_command(data, false, false, "malloc");
-	if (data->cmd_path == NULL)
+	if (!data->cmd_path)
 		ret_value = RET_COMMAND_NOT_FOUND;
 	else if (access(data->cmd_path, F_OK) != 0)
 	{
